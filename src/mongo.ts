@@ -1,4 +1,5 @@
 import { Db, MongoClient } from "mongodb";
+import { log } from "./util";
 
 
 const url = process.env.MONGO_CNSTRING || '';
@@ -12,10 +13,11 @@ export const openConnection = (callback: (db: Db) => any | void) => {
     client.connect(async function (err) {
         if (err)
             throw new Error("error while establishing connection do database " + err.message);
-    
-        console.log('Connected successfully to server');
-        const db : Db = client.db(dbName);
+
+        log('Connected successfully to server');
+        const db: Db = client.db(dbName);
         await callback(db);
+        log('cb called');
         client.close();
     });
 }
