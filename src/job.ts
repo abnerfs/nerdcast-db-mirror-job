@@ -1,6 +1,6 @@
 import { Db } from "mongodb";
 import { openConnection } from "./mongo";
-import { listNerdCasts } from "./nerdcasts-api";
+import { getSpotifyToken, listNerdCasts, searchEpisodeSpotify } from "./nerdcasts-api";
 import { log } from "./util";
 
 async function sleep(msec: number) {
@@ -12,6 +12,7 @@ const JOB_INTERVAL = 1000 * 60 * 30;
 
 openConnection(async (db: Db) => {
     while (true) {
+        const spotifyToken = await getSpotifyToken();
         const PER_PAGE = 10;
         let currentPage = 1;
 
@@ -31,6 +32,10 @@ openConnection(async (db: Db) => {
                 }
 
                 log(`${nerdcast.title}`);
+                if(spotifyToken) {
+                    nerdcast.spotify = await searchEpisodeSpotify(nerdcast.title, spotifyToken);
+                    console.log(nerdcast.spotify?.href);
+                }
                 nerdCastsInsert.push(nerdcast);
             }
 
